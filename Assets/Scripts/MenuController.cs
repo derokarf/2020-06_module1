@@ -34,6 +34,11 @@ public class MenuController : MonoBehaviour
         SetCurrentScreen(Screen.Main);
     }
 
+    // public void OpenMenu() {
+    //     SetCurrentScreen(Screen.Main);
+    //     LoadingScreen.instance.LoadScene("MainMenu");
+    // }
+
     public void StartNewGame()
     {
         SetCurrentScreen(Screen.None);
