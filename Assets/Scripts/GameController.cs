@@ -2,21 +2,46 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
+using TMPro;
 
 public class GameController : MonoBehaviour
 {
     public CanvasGroup buttonsCanvasGroup;
+
+    public CanvasGroup FinalMenuGroup;
+
+    public TextMeshProUGUI FinalMsg;
+
+    public CanvasGroup InGameMenuCanvasGroup;
     public Button switchButton;
     [SerializeField] private Character[] playerCharacters = default;
     [SerializeField] private Character[] enemyCharacters = default;
     Character currentTarget;
     bool waitingForInput;
 
+    bool inGameMenuEnable = false;
+    bool buttonsCanvasGroupEnable = true;
+
+
+    public static GameController instance { get; private set; }
+
     // Start is called before the first frame update
     void Start()
     {
+        Utility.SetCanvasGroupEnabled(buttonsCanvasGroup, buttonsCanvasGroupEnable);
+        Utility.SetCanvasGroupEnabled(InGameMenuCanvasGroup, inGameMenuEnable);
+        Utility.SetCanvasGroupEnabled(FinalMenuGroup, false);
+
         switchButton.onClick.AddListener(NextTarget);
         StartCoroutine(GameLoop());
+    }
+
+    public void ShowMenu() {
+        inGameMenuEnable = !inGameMenuEnable;
+        buttonsCanvasGroupEnable = !buttonsCanvasGroupEnable;
+        Utility.SetCanvasGroupEnabled(buttonsCanvasGroup, buttonsCanvasGroupEnable);
+        Utility.SetCanvasGroupEnabled(InGameMenuCanvasGroup, inGameMenuEnable);
     }
 
     public void PlayerAttack()
@@ -72,12 +97,19 @@ public class GameController : MonoBehaviour
 
     void PlayerWon()
     {
-        Debug.Log("Player won");
+        ShowFinalMenu("Player won");
     }
 
     void PlayerLost()
     {
-        Debug.Log("Player lost");
+        ShowFinalMenu("Player lost");
+    }
+
+    void ShowFinalMenu(string text) {
+        Utility.SetCanvasGroupEnabled(buttonsCanvasGroup, false);
+        Utility.SetCanvasGroupEnabled(InGameMenuCanvasGroup, false);
+        Utility.SetCanvasGroupEnabled(FinalMenuGroup, true);
+        FinalMsg.text = text;
     }
 
     bool CheckEndGame()
