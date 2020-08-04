@@ -22,6 +22,8 @@ public class MenuController : MonoBehaviour
     public CanvasGroup settingsScreen;
     public CanvasGroup levelsScreen;
 
+    public MenuSounds menuSounds;
+
     void SetCurrentScreen(Screen screen)
     {
         Utility.SetCanvasGroupEnabled(mainScreen, screen == Screen.Main);
@@ -34,10 +36,10 @@ public class MenuController : MonoBehaviour
         SetCurrentScreen(Screen.Main);
     }
 
-    // public void OpenMenu() {
-    //     SetCurrentScreen(Screen.Main);
-    //     LoadingScreen.instance.LoadScene("MainMenu");
-    // }
+    void Start() {
+
+        menuSounds.playBackground();
+    }
 
     public void StartNewGame()
     {

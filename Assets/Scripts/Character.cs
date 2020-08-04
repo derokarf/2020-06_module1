@@ -31,6 +31,8 @@ public class Character : MonoBehaviour
     public float distanceFromEnemy;
     public Transform target;
     public TargetIndicator targetIndicator;
+
+    CharacterSounds characterSounds;
     State state;
     Animator animator;
     Vector3 originalPosition;
@@ -41,11 +43,12 @@ public class Character : MonoBehaviour
     void Awake()
     {
         animator = GetComponentInChildren<Animator>();
-        state = State.Idle;
+        SetState(State.Idle);
         originalPosition = transform.position;
         originalRotation = transform.rotation;
         health = GetComponent<Health>();
         targetIndicator = GetComponentInChildren<TargetIndicator>();
+        characterSounds = GetComponentInChildren<CharacterSounds>();
     }
 
     public bool IsIdle()
@@ -60,43 +63,41 @@ public class Character : MonoBehaviour
 
     public void SetState(State newState)
     {
-        if (IsDead())
-            return;
-
+        if (characterSounds) {
+            if ((newState == State.RunningFromEnemy) || (newState == State.RunningToEnemy)) {
+                characterSounds.playSteps();
+            } else {
+                characterSounds.stopSteps();
+            }
+        }
         state = newState;
     }
 
     public void DoDamage()
     {
-        if (IsDead())
-            return;
-
         health.ApplyDamage(1.0f); // FIXME захардкожено
         if (health.current <= 0.0f)
-            state = State.BeginDying;
+            SetState(State.BeginDying);
     }
 
     [ContextMenu("Attack")]
     public void AttackEnemy()
     {
-        if (IsDead())
-            return;
-
         Character targetCharacter = target.GetComponent<Character>();
         if (targetCharacter.IsDead())
             return;
 
         switch (weapon) {
             case Weapon.Bat:
-                state = State.RunningToEnemy;
+                SetState(State.RunningToEnemy);
                 break;
 
             case Weapon.Fist:
-                state = State.RunningToEnemy;
+                SetState(State.RunningToEnemy);
                 break;
 
             case Weapon.Pistol:
-                state = State.BeginShoot;
+                SetState(State.BeginShoot);
                 break;
         }
     }
@@ -138,19 +139,20 @@ public class Character : MonoBehaviour
                 if (RunTowards(target.position, distanceFromEnemy)) {
                     switch (weapon) {
                         case Weapon.Bat:
-                            state = State.BeginAttack;
+                            SetState(State.BeginAttack);
                             break;
 
                         case Weapon.Fist:
-                            state = State.BeginPunch;
+                            SetState(State.BeginPunch);
                             break;
                     }
                 }
                 break;
 
             case State.BeginAttack:
+                characterSounds.playAttack();
                 animator.SetTrigger("MeleeAttack");
-                state = State.Attack;
+                SetState(State.Attack);
                 break;
 
             case State.Attack:
@@ -158,15 +160,17 @@ public class Character : MonoBehaviour
 
             case State.BeginShoot:
                 animator.SetTrigger("Shoot");
-                state = State.Shoot;
+                SetState(State.Shoot);
                 break;
 
             case State.Shoot:
+                characterSounds.playAttack();
                 break;
 
             case State.BeginPunch:
+                characterSounds.playAttack();
                 animator.SetTrigger("Punch");
-                state = State.Punch;
+                SetState(State.Punch);
                 break;
 
             case State.Punch:
@@ -174,17 +178,19 @@ public class Character : MonoBehaviour
 
             case State.RunningFromEnemy:
                 animator.SetFloat("Speed", runSpeed);
-                if (RunTowards(originalPosition, 0.0f))
-                    state = State.Idle;
+                if (RunTowards(originalPosition, 0.0f)){
+                    SetState(State.Idle);
+                }
                 break;
 
             case State.BeginDying:
                 animator.SetTrigger("Death");
-                state = State.Dead;
+                SetState(State.Dead);
+                characterSounds.playDeath();
                 break;
 
             case State.Dead:
                 break;
-        }
+        }      
     }
 }

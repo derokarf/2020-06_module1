@@ -13,6 +13,8 @@ public class GameController : MonoBehaviour
 
     public TextMeshProUGUI FinalMsg;
 
+    public LevelSounds levelSounds;
+
     public CanvasGroup InGameMenuCanvasGroup;
     public Button switchButton;
     [SerializeField] private Character[] playerCharacters = default;
@@ -35,6 +37,7 @@ public class GameController : MonoBehaviour
 
         switchButton.onClick.AddListener(NextTarget);
         StartCoroutine(GameLoop());
+        levelSounds.playBackground();
     }
 
     public void ShowMenu() {
@@ -98,11 +101,13 @@ public class GameController : MonoBehaviour
     void PlayerWon()
     {
         ShowFinalMenu("Player won");
+        levelSounds.playWin();
     }
 
     void PlayerLost()
     {
         ShowFinalMenu("Player lost");
+        levelSounds.playGameOver();
     }
 
     void ShowFinalMenu(string text) {
